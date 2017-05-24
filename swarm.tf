@@ -2,6 +2,11 @@ provider "aws" {
   region = "${var.zone}"
 }
 
+resource "aws_key_pair" "node_key" {
+  key_name   = "${var.credentials["name"]}"
+  public_key = "${file("public_keys/${var.credentials["name"]}.pub")}"
+}
+
 resource "aws_instance" "manager" {
   ami             = "${var.ami[var.zone]}"
   key_name        = "${var.credentials["name"]}"
