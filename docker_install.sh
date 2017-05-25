@@ -1,6 +1,6 @@
 #
 # Name - docker_install.sh
-# Desc - this script will be used to install Docker on a CentOS or Red Hat
+# Desc - this script will be used to install Docker on the Amazon Linux AMI
 #        instance. It follows along with the installation guide from Docker,
 #        found at https://docs.docker.com/engine/installation/
 #
@@ -8,8 +8,8 @@
 # Prepare for installation.
 sudo yum update -y
 
-# Install Docker.
-sudo yum install -y docker
+# Install Docker and jq (for JSON parsing).
+sudo yum install -y docker jq
 
 # Start the Docker service.
 sudo service docker start

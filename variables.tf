@@ -28,3 +28,18 @@ variable "ami" {
     sa-east-1      = "ami-37cfad5b"
   }
 }
+
+variable "node_count" {
+  type    = "string"
+  default = "5"
+}
+
+data "external" "get_tokens" {
+  program = ["bash", "${path.module}/get_tokens.sh"]
+
+  query = {
+    user    = "${var.user}"
+    address = "${aws_instance.manager.public_ip}"
+    keypath = "${var.credentials["location"]}/${var.credentials["name"]}"
+  }
+}
