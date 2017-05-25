@@ -2,7 +2,7 @@ variable "credentials" {
   type = "map"
 
   default = {
-    name     = "supersecure"
+    name     = "cogmind"
     location = "~/.ssh"
   }
 }

@@ -4,7 +4,7 @@ provider "aws" {
 
 resource "aws_key_pair" "node_key" {
   key_name   = "${var.credentials["name"]}"
-  public_key = "${file("public_keys/${var.credentials["name"]}.pub")}"
+  public_key = "${file("${path.module}/public_keys/${var.credentials["name"]}.pub")}"
 }
 
 resource "aws_instance" "manager" {
@@ -12,13 +12,13 @@ resource "aws_instance" "manager" {
   key_name        = "${var.credentials["name"]}"
   instance_type   = "t2.micro"
   security_groups = ["${aws_security_group.ssh.name}"]
-  
+
   tags {
     Name = "swarm-manager"
   }
 
   provisioner "remote-exec" {
-    script = "./docker_install.sh"
+    script = "${path.module}/docker_install.sh"
 
     connection {
       type        = "ssh"
@@ -28,7 +28,7 @@ resource "aws_instance" "manager" {
   }
 
   provisioner "remote-exec" {
-    script = "./init_swarm.sh"
+    script = "${path.module}/init_swarm.sh"
 
     connection {
       type        = "ssh"
@@ -50,7 +50,7 @@ resource "aws_instance" "node" {
   }
 
   provisioner "remote-exec" {
-    script = "./docker_install.sh"
+    script = "${path.module}/docker_install.sh"
 
     connection {
       type        = "ssh"
