@@ -8,10 +8,11 @@ resource "aws_key_pair" "node_key" {
 }
 
 resource "aws_instance" "manager" {
-  ami             = "${var.ami[var.zone]}"
+  ami             = "${data.aws_ami.latest_ami.id}"
+  count         = "${var.manager_count}"
   key_name        = "${var.credentials["name"]}"
   instance_type   = "t2.micro"
-  security_groups = ["${aws_security_group.ssh.name}"]
+  security_groups = ["${aws_security_group.ssh.name}", "${aws_security_group.default_vpc_docker.name}"]
 
   tags {
     Name = "swarm-manager"
@@ -23,7 +24,7 @@ resource "aws_instance" "manager" {
     connection {
       type        = "ssh"
       user        = "${var.user}"
-      private_key = "${file("~/.ssh/${var.credentials["name"]}")}"
+      private_key = "${file("${var.credentials["location"]}/${var.credentials["name"]}")}"
     }
   }
 
@@ -39,11 +40,11 @@ resource "aws_instance" "manager" {
 }
 
 resource "aws_instance" "node" {
-  ami             = "${var.ami[var.zone]}"
-  count           = "${var.node_count}"
+  ami             = "${data.aws_ami.latest_ami.id}"
+  count           = "${var.worker_count}"
   key_name        = "${var.credentials["name"]}"
   instance_type   = "t2.micro"
-  security_groups = ["${aws_security_group.ssh.name}"]
+  security_groups = ["${aws_security_group.ssh.name}", "${aws_security_group.default_vpc_docker.name}"]
 
   tags {
     Name = "swarm-worker-${count.index}"
@@ -72,6 +73,32 @@ resource "aws_instance" "node" {
   }
 }
 
+resource "aws_default_vpc" "default" {
+  tags {
+    Name = "Default vpc."
+  }
+}
+
+resource "aws_security_group" "default_vpc_docker" {
+  name        = "default_vpc"
+  description = "Allows Docker traffic through default VPC."
+  vpc_id      = "${aws_default_vpc.default.id}"
+
+  ingress {
+    from_port   = 2377
+    to_port     = 2377
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 2377
+    to_port     = 2377
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_security_group" "ssh" {
   name        = "allow_ssh"
   description = "Allows inbound ssh connections."
@@ -79,13 +106,6 @@ resource "aws_security_group" "ssh" {
   ingress {
     from_port   = 22
     to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 2377
-    to_port     = 2377
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -107,13 +127,6 @@ resource "aws_security_group" "ssh" {
   egress {
     from_port   = 443
     to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 2377
-    to_port     = 2377
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

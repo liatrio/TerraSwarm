@@ -4,7 +4,6 @@
 #        instance. It follows along with the installation guide from Docker,
 #        found at https://docs.docker.com/engine/installation/
 #
-
 # Prepare for installation.
 sudo yum update -y
 
