@@ -9,13 +9,17 @@ resource "aws_key_pair" "node_key" {
 
 resource "aws_instance" "manager" {
   ami             = "${data.aws_ami.latest_ami.id}"
-  count         = "${var.manager_count}"
+  count           = "${var.manager_count}"
   key_name        = "${var.credentials["name"]}"
-  instance_type   = "t2.micro"
+  instance_type   = "t2.large"
   security_groups = ["${aws_security_group.ssh.name}", "${aws_security_group.default_vpc_docker.name}"]
 
+  root_block_device {
+    volume_size     = 20
+  }
+
   tags {
-    Name = "swarm-manager"
+    Name = "swarm-manager-${count.index}"
   }
 
   provisioner "remote-exec" {
@@ -43,8 +47,12 @@ resource "aws_instance" "node" {
   ami             = "${data.aws_ami.latest_ami.id}"
   count           = "${var.worker_count}"
   key_name        = "${var.credentials["name"]}"
-  instance_type   = "t2.micro"
+  instance_type   = "t2.large"
   security_groups = ["${aws_security_group.ssh.name}", "${aws_security_group.default_vpc_docker.name}"]
+
+  root_block_device {
+    volume_size     = 20
+  }
 
   tags {
     Name = "swarm-worker-${count.index}"
@@ -110,6 +118,48 @@ resource "aws_security_group" "ssh" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 4789
+    to_port     = 4789
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 5601
+    to_port     = 5601
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 7946
+    to_port     = 7946
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 7946
+    to_port     = 7946
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 22
     to_port     = 22
@@ -125,9 +175,51 @@ resource "aws_security_group" "ssh" {
   }
 
   egress {
+    from_port   = 389
+    to_port     = 389
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 389
+    to_port     = 389
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 4789
+    to_port     = 4789
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 5601
+    to_port     = 5601
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 7946
+    to_port     = 7946
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 7946
+    to_port     = 7946
+    protocol    = "udp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }

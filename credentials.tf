@@ -2,7 +2,7 @@ variable "credentials" {
   type = "map"
 
   default = {
-    name     = "cogmind"
+    name     = "ldop-test"
     location = "~/.ssh"
   }
 }

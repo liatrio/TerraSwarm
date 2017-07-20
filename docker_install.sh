@@ -4,6 +4,13 @@
 #        instance. It follows along with the installation guide from Docker,
 #        found at https://docs.docker.com/engine/installation/
 #
+
+sudo dd if=/dev/zero of=/var/myswap bs=1M count=2048
+sudo mkswap /var/myswap
+sudo chmod 0600 /var/myswap
+sudo swapon /var/myswap
+sudo sh -c 'echo "/var/myswap   swap   swap   defaults  0 0" >> /etc/fstab'
+
 # Prepare for installation.
 sudo yum update -y
 
