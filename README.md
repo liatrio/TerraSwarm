@@ -6,6 +6,8 @@ You will need to have TerraForm >= 9.11 installed on your host machine, as well 
 
 An example credentials file can be found below.
 
+*You need the jq utility to be installed to use TerraSwarm.*
+
 ------
 
 [default]
