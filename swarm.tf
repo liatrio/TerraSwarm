@@ -15,7 +15,7 @@ resource "aws_instance" "manager" {
   security_groups = ["${aws_security_group.ssh.name}", "${aws_security_group.default_vpc_docker.name}"]
 
   root_block_device {
-    volume_size     = 20
+    volume_size = 20
   }
 
   tags {
@@ -51,7 +51,7 @@ resource "aws_instance" "node" {
   security_groups = ["${aws_security_group.ssh.name}", "${aws_security_group.default_vpc_docker.name}"]
 
   root_block_device {
-    volume_size     = 20
+    volume_size = 20
   }
 
   tags {

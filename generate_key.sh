@@ -5,17 +5,24 @@
 #        us to use the new keys wihtout further configuration.
 #
 
-ssh-keygen -b 4096 -t rsa -N '' -f ${1}
+if [ -z "$1" ];
+then
+  KEYNAME=terraswarm
+else
+  KEYNAME=$1
+fi
 
-chmod 400 ${1}
+ssh-keygen -b 4096 -t rsa -N '' -f $KEYNAME
+
+chmod 400 $KEYNAME
 
 if [ ! -d "public_keys" ]; then
   mkdir public_keys
 fi
 
-mv ${1} ~/.ssh/
-mv ${1}.pub public_keys/
+mv $KEYNAME ~/.ssh/
+mv $KEYNAME.pub public_keys/
 
-printf "variable \"credentials\"{\ntype=\"map\"\ndefault={\nname=\"${1}\"\nlocation=\"~/.ssh\"\n}\n}\n" > credentials.tf
+printf "variable \"credentials\"{\ntype=\"map\"\ndefault={\nname=\"$KEYNAME\"\nlocation=\"~/.ssh\"\n}\n}\n" > credentials.tf
 
 terraform fmt
