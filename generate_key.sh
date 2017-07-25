@@ -16,12 +16,11 @@ ssh-keygen -b 4096 -t rsa -N '' -f $KEYNAME
 
 chmod 400 $KEYNAME
 
-if [ ! -d "public_keys" ]; then
-  mkdir public_keys
-fi
+mkdir -p credentials/public_keys
+mkdir -p credentials/private_keys
 
-mv $KEYNAME ~/.ssh/
-mv $KEYNAME.pub public_keys/
+mv $KEYNAME credentials/private_keys
+mv $KEYNAME.pub credentials/public_keys
 
 printf "variable \"credentials\"{\ntype=\"map\"\ndefault={\nname=\"$KEYNAME\"\nlocation=\"~/.ssh\"\n}\n}\n" > credentials.tf
 

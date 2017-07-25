@@ -4,7 +4,7 @@ provider "aws" {
 
 resource "aws_key_pair" "node_key" {
   key_name   = "${var.credentials["name"]}"
-  public_key = "${file("${path.module}/public_keys/${var.credentials["name"]}.pub")}"
+  public_key = "${file("${path.module}/credentials/public_keys/${var.credentials["name"]}.pub")}"
 }
 
 resource "aws_instance" "manager" {
@@ -19,7 +19,7 @@ resource "aws_instance" "manager" {
   }
 
   tags {
-    Name = "swarm-manager-${count.index}"
+    Name    = "swarm-manager-${count.index}"
     Project = "LDOP"
   }
 
@@ -29,7 +29,7 @@ resource "aws_instance" "manager" {
     connection {
       type        = "ssh"
       user        = "${var.user}"
-      private_key = "${file("${var.credentials["location"]}/${var.credentials["name"]}")}"
+      private_key = "${file("${path.module}/credentials/private_keys/${var.credentials["name"]}")}"
     }
   }
 
@@ -39,7 +39,7 @@ resource "aws_instance" "manager" {
     connection {
       type        = "ssh"
       user        = "${var.user}"
-      private_key = "${file("~/.ssh/${var.credentials["name"]}")}"
+      private_key = "${file("${path.module}/credentials/private_keys/${var.credentials["name"]}")}"
     }
   }
 }
@@ -56,7 +56,7 @@ resource "aws_instance" "node" {
   }
 
   tags {
-    Name = "swarm-worker-${count.index}"
+    Name    = "swarm-worker-${count.index}"
     Project = "LDOP"
   }
 
@@ -66,7 +66,7 @@ resource "aws_instance" "node" {
     connection {
       type        = "ssh"
       user        = "${var.user}"
-      private_key = "${file("~/.ssh/${var.credentials["name"]}")}"
+      private_key = "${file("${path.module}/credentials/private_keys/${var.credentials["name"]}")}"
     }
   }
 
@@ -78,14 +78,14 @@ resource "aws_instance" "node" {
     connection {
       type        = "ssh"
       user        = "${var.user}"
-      private_key = "${file("~/.ssh/${var.credentials["name"]}")}"
+      private_key = "${file("${path.module}/credentials/private_keys/${var.credentials["name"]}")}"
     }
   }
 }
 
 resource "aws_default_vpc" "default" {
   tags {
-    Name = "Default vpc."
+    Name    = "Default vpc."
     Project = "LDOP"
   }
 }
