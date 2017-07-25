@@ -35,6 +35,6 @@ data "external" "get_tokens" {
   query = {
     user    = "${var.user}"
     address = "${aws_instance.manager.public_ip}"
-    keypath = "${var.credentials["location"]}/${var.credentials["name"]}"
+    keypath = "${path.module}/credentials/private_keys/${var.credentials["name"]}"
   }
 }
