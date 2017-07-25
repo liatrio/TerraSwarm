@@ -15,7 +15,7 @@ sudo sh -c 'echo "/var/myswap   swap   swap   defaults  0 0" >> /etc/fstab'
 sudo yum update -y
 
 # Install Docker and jq (for JSON parsing).
-sudo yum install -y docker jq
+sudo yum install -y docker jq git
 
 # Start the Docker service.
 sudo service docker start

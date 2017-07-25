@@ -20,6 +20,7 @@ resource "aws_instance" "manager" {
 
   tags {
     Name = "swarm-manager-${count.index}"
+    Project = "LDOP"
   }
 
   provisioner "remote-exec" {
@@ -56,6 +57,7 @@ resource "aws_instance" "node" {
 
   tags {
     Name = "swarm-worker-${count.index}"
+    Project = "LDOP"
   }
 
   provisioner "remote-exec" {
@@ -84,6 +86,7 @@ resource "aws_instance" "node" {
 resource "aws_default_vpc" "default" {
   tags {
     Name = "Default vpc."
+    Project = "LDOP"
   }
 }
 
@@ -126,8 +129,29 @@ resource "aws_security_group" "ssh" {
   }
 
   ingress {
+    from_port   = 389
+    to_port     = 389
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 389
+    to_port     = 389
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     from_port   = 443
     to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 4789
+    to_port     = 4789
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -191,6 +215,13 @@ resource "aws_security_group" "ssh" {
   egress {
     from_port   = 443
     to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 4789
+    to_port     = 4789
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
