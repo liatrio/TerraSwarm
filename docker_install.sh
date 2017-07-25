@@ -17,6 +17,9 @@ sudo yum update -y
 # Install Docker and jq (for JSON parsing).
 sudo yum install -y docker jq git
 
+# Update the default maximum number of file descriptors that a container can have
+sudo sed -i 's/1024:4096/32000:32000/g' /etc/sysconfig/docker
+
 # Start the Docker service.
 sudo service docker start
 
