@@ -72,7 +72,7 @@ resource "aws_instance" "node" {
 
   provisioner "remote-exec" {
     inline = [
-      "docker swarm join --token ${data.external.get_tokens.result["worker"]} ${aws_instance.manager.public_ip}:2377",
+      "docker swarm join --token ${data.external.get_tokens.result["worker"]} ${aws_instance.manager.private_ip}:2377",
     ]
 
     connection {
