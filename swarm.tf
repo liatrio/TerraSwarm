@@ -7,11 +7,10 @@ resource "aws_key_pair" "node_key" {
   public_key = "${file("${path.module}/credentials/public_keys/${var.credentials["name"]}.pub")}"
 }
 
-
 ### VPC
 
 resource "aws_vpc" "swarm" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
 
   tags {
@@ -20,8 +19,8 @@ resource "aws_vpc" "swarm" {
 }
 
 resource "aws_subnet" "swarm" {
-  cidr_block = "10.0.0.0/16"
-  vpc_id = "${aws_vpc.swarm.id}"
+  cidr_block              = "10.0.0.0/16"
+  vpc_id                  = "${aws_vpc.swarm.id}"
   map_public_ip_on_launch = true
 
   tags {
@@ -55,13 +54,12 @@ resource "aws_route_table_association" "swarm" {
   route_table_id = "${aws_route_table.swarm.id}"
 }
 
-
 ### Security Groups
 
 resource "aws_security_group" "ssh" {
   name        = "allow_ssh"
   description = "Allows inbound ssh connections. Also allows all egress connections."
-  vpc_id = "${aws_vpc.swarm.id}"
+  vpc_id      = "${aws_vpc.swarm.id}"
 
   ingress {
     from_port   = 22
@@ -81,7 +79,7 @@ resource "aws_security_group" "ssh" {
 resource "aws_security_group" "https" {
   name        = "allow_https"
   description = "Allows inbount http/s connections"
-  vpc_id = "${aws_vpc.swarm.id}"
+  vpc_id      = "${aws_vpc.swarm.id}"
 
   ingress {
     from_port   = 80
@@ -101,7 +99,7 @@ resource "aws_security_group" "https" {
 resource "aws_security_group" "swarm_internal" {
   name        = "swarm_internal"
   description = "Allows all internal traffic between nodes in the swarm cluster"
-  vpc_id = "${aws_vpc.swarm.id}"
+  vpc_id      = "${aws_vpc.swarm.id}"
 
   ingress {
     from_port   = 0
@@ -112,7 +110,6 @@ resource "aws_security_group" "swarm_internal" {
   }
 }
 
-
 ### EFS
 
 resource "aws_efs_file_system" "swarm" {
@@ -122,20 +119,19 @@ resource "aws_efs_file_system" "swarm" {
 }
 
 resource "aws_efs_mount_target" "swarm" {
-  file_system_id = "${aws_efs_file_system.swarm.id}"
-  subnet_id      = "${aws_subnet.swarm.id}"
+  file_system_id  = "${aws_efs_file_system.swarm.id}"
+  subnet_id       = "${aws_subnet.swarm.id}"
   security_groups = ["${aws_security_group.swarm_internal.id}"]
 }
-
 
 ### Instances
 
 resource "aws_instance" "manager" {
-  ami             = "${data.aws_ami.latest_ami.id}"
-  count           = "${var.manager_count}"
-  key_name        = "${var.credentials["name"]}"
-  instance_type   = "t2.large"
-  subnet_id      = "${aws_subnet.swarm.id}"
+  ami                    = "${data.aws_ami.latest_ami.id}"
+  count                  = "${var.manager_count}"
+  key_name               = "${var.credentials["name"]}"
+  instance_type          = "t2.large"
+  subnet_id              = "${aws_subnet.swarm.id}"
   vpc_security_group_ids = ["${aws_security_group.ssh.id}", "${aws_security_group.swarm_internal.id}", "${aws_security_group.https.id}"]
 
   root_block_device {
@@ -167,14 +163,14 @@ resource "aws_instance" "manager" {
     }
   }
 
-	# Mount efs to /mnt/efs
+  # Mount efs to /mnt/efs
   provisioner "remote-exec" {
-		inline = [
-      "echo ${aws_efs_mount_target.swarm.id}", # Create dependency
-			"sudo yum install -y nfs-utils",
-			"sudo mkdir /mnt/efs",
-			"sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${aws_efs_file_system.swarm.id}.efs.${var.zone}.amazonaws.com:/ /mnt/efs",
-		]
+    inline = [
+      "echo ${aws_efs_mount_target.swarm.id}",                                                                                                                           # Create dependency
+      "sudo yum install -y nfs-utils",
+      "sudo mkdir /mnt/efs",
+      "sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${aws_efs_file_system.swarm.id}.efs.${var.zone}.amazonaws.com:/ /mnt/efs",
+    ]
 
     connection {
       type        = "ssh"
@@ -182,7 +178,6 @@ resource "aws_instance" "manager" {
       private_key = "${file("${path.module}/credentials/private_keys/${var.credentials["name"]}")}"
     }
   }
-
 }
 
 resource "aws_instance" "node" {
@@ -190,7 +185,7 @@ resource "aws_instance" "node" {
   count           = "${var.worker_count}"
   key_name        = "${var.credentials["name"]}"
   instance_type   = "t2.large"
-  subnet_id      = "${aws_subnet.swarm.id}"
+  subnet_id       = "${aws_subnet.swarm.id}"
   security_groups = ["${aws_security_group.ssh.id}", "${aws_security_group.swarm_internal.id}"]
 
   root_block_device {
@@ -224,14 +219,14 @@ resource "aws_instance" "node" {
     }
   }
 
-	# Mount efs to /mnt/efs
+  # Mount efs to /mnt/efs
   provisioner "remote-exec" {
-		inline = [
-      "echo ${aws_efs_mount_target.swarm.id}", # Create dependency
-			"sudo yum install -y nfs-utils",
-			"sudo mkdir /mnt/efs",
-			"sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${aws_efs_file_system.swarm.id}.efs.${var.zone}.amazonaws.com:/ /mnt/efs",
-		]
+    inline = [
+      "echo ${aws_efs_mount_target.swarm.id}",                                                                                                                           # Create dependency
+      "sudo yum install -y nfs-utils",
+      "sudo mkdir /mnt/efs",
+      "sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${aws_efs_file_system.swarm.id}.efs.${var.zone}.amazonaws.com:/ /mnt/efs",
+    ]
 
     connection {
       type        = "ssh"
@@ -240,4 +235,3 @@ resource "aws_instance" "node" {
     }
   }
 }
-
